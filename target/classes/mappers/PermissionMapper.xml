@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xxxx.crm.dao.PermissionMapper" >
+  <resultMap id="BaseResultMap" type="com.xxxx.crm.vo.Permission" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="module_id" property="moduleId" jdbcType="INTEGER" />
+    <result column="acl_value" property="aclValue" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, role_id, module_id, acl_value, create_date, update_date
+  </sql>
+  <!--查询用户分配的权限-->
+  <select id="queryRoleHasModuleIdsByRoleId" parameterType="Integer" resultType="java.lang.Integer">
+    select
+        module_id
+    from
+        t_permission
+    where role_id = #{roleId}
+  </select>
+  <!--批量添加-->
+  <insert id="insertBatch" parameterType="com.xxxx.crm.vo.Permission">
+    insert into t_permission (role_id,module_id,acl_value,create_date,update_date)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.roleId},#{item.moduleId},#{item.aclValue},#{item.createDate},#{item.updateDate})
+    </foreach>
+  </insert>
+  <!--查询roleId数量-->
+  <select id="countPermissionByRoleId" parameterType="Integer" resultType="java.lang.Integer">
+    select count(*) from t_permission where role_id = #{roleId}
+  </select>
+  <!--删除roleId-->
+  <delete id="deletePermissionByRoleId" parameterType="Integer">
+    delete
+    from t_permission
+    where role_id = #{roleId};
+  </delete>
+  <!--通过用户ID查询对应的资源列表（资源权限码）-->
+  <select id="queryUserHasRoleHasPermissionByUserId" parameterType="Integer" resultType="java.lang.String">
+    select distinct p.acl_value from t_user_role ur left join t_permission p on ur.role_id =  p.role_id where user_id = #{userId}
+  </select>
+</mapper>
